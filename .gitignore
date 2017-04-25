@@ -2,6 +2,7 @@
 /results
 /submissions
 /dataset
+/model_frozen
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
