@@ -13,6 +13,8 @@ def parseArguments() :
 
     parser.add_argument("--src_images_dir", type=str, required=True, help="Root dir with images")
     parser.add_argument("--out_images_dir",type=str, required=True, help="Root dir for output images")
+    parser.add_argument("--simpleAugmentation", action="store_true",
+                        help="Enable simple augmentation 5X (4 angles + center)")
     parser.add_argument("--square_crop_size",type=int, required=True, help="Square utils size (no warping)")
     parser.add_argument("--debug", action="store_true",help="Enable Debug")
 
@@ -34,14 +36,21 @@ if __name__ == '__main__':
         if os.path.exists(srcImagesDir):
 
             #Get images files
-            imageFiles = [os.path.join(srcImagesDir, f) for f in os.listdir(srcImagesDir) if os.path.isfile(os.path.join(srcImagesDir, f))]
+            imageFiles = [os.path.join(srcImagesDir, f) for f in os.listdir(srcImagesDir)
+                          if os.path.isfile(os.path.join(srcImagesDir, f))]
 
             for imageFile in imageFiles :
 
                 print ("Cropping image: " + imageFile)
 
-                crops = utils.crop.augmentationCropNoWarp(imageFile, squareSize=args.square_crop_size,
-                                                debug=args.debug)
+                if args.simpleAugmentation:
+                    # 4 angles and center (no checks, need to squash images on training)
+                    crops = utils.crop.simpleAugmentation(imageFile, squareSize=args.square_crop_size,
+                                                                   debug=args.debug)
+                else:
+                    # Multiple crops of squre size (precise squares)
+                    crops = utils.crop.augmentationMultipleCropsNoWarp(imageFile, squareSize=args.square_crop_size,
+                                                                   debug=args.debug)
 
                 for index, crop in enumerate(crops) :
 
